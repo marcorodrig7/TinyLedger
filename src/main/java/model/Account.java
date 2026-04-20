@@ -3,8 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-import static model.Transaction.Type.DEPOSIT;
-import static model.Transaction.Type.WITHDRAWAL;
+import static model.Transaction.Type.*;
 
 public class Account {
 
@@ -45,6 +44,16 @@ public class Account {
             this.balance = this.balance - transaction.getAmount();
             transactions.add(transaction);
         }
+        else if(transaction.getType() == TRANSFER_IN) {
+            this.balance = this.balance + transaction.getAmount();
+            transactions.add(transaction);
+        }
+        else if(transaction.getType() == TRANSFER_OUT) {
+            this.balance = this.balance - transaction.getAmount();
+            transactions.add(transaction);
+        }
     }
+
+
 
 }

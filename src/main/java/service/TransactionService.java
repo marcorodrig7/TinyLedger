@@ -4,12 +4,14 @@ import model.Account;
 import model.Transaction;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import static model.Transaction.Type.DEPOSIT;
-import static model.Transaction.Type.WITHDRAWAL;
+import static model.Transaction.Type.*;
 
 public class TransactionService {
 
@@ -69,6 +71,36 @@ public class TransactionService {
         else {
             return null;
         }
+    }
+
+    public static List<Transaction> getTransactionHistoryByAccount(Long idAccount, LocalDateTime in, LocalDateTime out) {
+        boolean isAccountCreated = accounts.containsKey(idAccount);
+
+        Predicate<Transaction> transactionBefore = e -> e.getDateTime().isBefore(out);
+        Predicate<Transaction> transactionAfter = e -> e.getDateTime().isAfter(in);
+
+        if(isAccountCreated) {
+            Account account = accounts.get(idAccount);
+
+            return account.getTransactions().stream().filter(transactionBefore.and(transactionAfter)).collect(Collectors.toList());
+        }
+        else {
+            return null;
+        }
+    }
+
+    public static void makeTransfer(Long idAccountOrigin, Long idAccountDestination, Double amount) {
+        boolean isAccountOriginCreated = accounts.containsKey(idAccountOrigin);
+        boolean isAccountDestinationCreated = accounts.containsKey(idAccountDestination);
+
+        if(isAccountOriginCreated && isAccountDestinationCreated) {
+            Account accountOrigin = accounts.get(idAccountOrigin);
+            Account accountDestination = accounts.get(idAccountDestination);
+
+            accountOrigin.addTransaction(new Transaction(amount, LocalDateTime.now(), TRANSFER_OUT));
+            accountDestination.addTransaction(new Transaction(amount, LocalDateTime.now(), TRANSFER_IN));
+        }
+
     }
 
     private static void makeTransaction(Long idAccount, Double amount, Transaction.Type transactionType) {
